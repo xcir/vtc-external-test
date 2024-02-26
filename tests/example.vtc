@@ -1,0 +1,40 @@
+vtest "example.net"
+
+feature ignore_unknown_macro
+feature cmd {haproxy --version 2>&1 | grep -q 'HA-*Proxy version'}
+haproxy h1 -conf {
+    defaults
+        mode   http
+        timeout connect         5s
+        timeout server          5s
+        timeout client          5s
+
+    backend be1
+        #https
+        server srv1 ${target}:443 ssl verify none
+    backend be2
+        #http
+        server srv1 ${target}:80
+
+    frontend fe1
+        #https
+        use_backend be1
+        bind "fd@${fe1}"
+    frontend fe2
+        #http
+        use_backend be2
+        bind "fd@${fe2}"
+} -start
+#-----------------------------------------
+
+client c_http -connect ${h1_fe2_sock} {
+    txreq -req GET -url "/" -hdr "Host: example.net"
+    rxresp
+    expect resp.status        == "200"
+} -run
+
+client c_http -connect ${h1_fe1_sock} {
+    txreq -req GET -url "/" -hdr "Host: example.net"
+    rxresp
+    expect resp.status        == "200"
+} -run
