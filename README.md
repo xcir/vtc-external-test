@@ -194,7 +194,7 @@ Specify with `-connect` to connect from the client to the target.
 | HTTP:                | `client XXX -connect ${h1_fe2_sock} {[testcode]}` |
 | HTTPS:               | `client XXX -connect ${h1_fe1_sock} {[testcode]}` |
 
-For other notations, [see].(https://varnish-cache.org/docs/trunk/reference/vtc.html)
+For other notations, [see.](https://varnish-cache.org/docs/trunk/reference/vtc.html)
 
 ## Tips
 
