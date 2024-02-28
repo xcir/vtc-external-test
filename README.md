@@ -32,7 +32,7 @@ haproxy h1 -conf {
 
     backend be1
         #https
-        server srv1 ${target}:443 ssl verify none
+        server srv1 ${target}:443 ssl verify none sni req.hdr(Host)
     backend be2
         #http
         server srv1 ${target}:80
@@ -148,10 +148,10 @@ haproxy h1 -conf {
 
     backend be1
         #https
-        server srv1 ${target}:443 ssl verify none
+        server srv1 ${target}:443 ssl verify none sni req.hdr(Host)
     backend be2
         #http
-        server srv1 ${target}:80 # resolvers dns check inter 5000
+        server srv1 ${target}:80
 
     frontend fe1
         #https
