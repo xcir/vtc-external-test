@@ -13,8 +13,9 @@ This is a script for easy unit testing using varnishtest for domains in CDNs, et
 # Require
 
 - docker
+- curl (when using `curl.sh`)
 
-# Quick tutorial
+# VTC Quick tutorial
 
 ```
 xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ cat tests/example.vtc 
@@ -74,6 +75,55 @@ xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ ./vtc.sh -c example.net tests/example.v
             VTC: /home/xcir/git/vtc-ext-test/tests/example.vtc
 ==============================================
 #    top  TEST /mnt/tests/test.vtc passed (5.951)
+```
+
+# curl.sh Quick tutorial
+
+```
+xcir@DESKTOP-UL5EP50:~/git/vtc-external-test$ ./curl.sh --vc example.net --verbose -I  http://example.net/
+##############################
+  Target Server | example.net
+ Target IP:PORT | 93.184.216.34:80
+        Command | curl --resolve example.net:80:93.184.216.34 --verbose -I http://example.net/
+##############################
+
+* Added example.net:80:93.184.216.34 to DNS cache
+* Hostname example.net was found in DNS cache
+*   Trying 93.184.216.34:80...
+* Connected to example.net (93.184.216.34) port 80 (#0)
+> HEAD / HTTP/1.1
+> Host: example.net
+> User-Agent: curl/7.81.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+< Accept-Ranges: bytes
+Accept-Ranges: bytes
+< Age: 499909
+Age: 499909
+< Cache-Control: max-age=604800
+Cache-Control: max-age=604800
+< Content-Type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
+< Date: Tue, 19 Mar 2024 15:56:55 GMT
+Date: Tue, 19 Mar 2024 15:56:55 GMT
+< Etag: "3147526947+gzip"
+Etag: "3147526947+gzip"
+< Expires: Tue, 26 Mar 2024 15:56:55 GMT
+Expires: Tue, 26 Mar 2024 15:56:55 GMT
+< Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
+Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
+< Server: ECS (sac/2508)
+Server: ECS (sac/2508)
+< X-Cache: HIT
+X-Cache: HIT
+< Content-Length: 1256
+Content-Length: 1256
+
+< 
+* Connection #0 to host example.net left intact
 ```
 
 # What is this?
