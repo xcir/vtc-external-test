@@ -1,4 +1,7 @@
 #!/bin/bash
+# todo:
+# パラメータチェックを追加
+# Commentを英語に変更
 shopt -s nocasematch
 
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
