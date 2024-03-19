@@ -71,7 +71,7 @@ haproxy h1 -conf {
 xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ ./vtc.sh -c example.net tests/example.vtc 
 ==============================================
   Target Server: example.net
-            VTC: /home/xcir/work/akamai/vtc-external-test/tests/example.vtc
+            VTC: /home/xcir/git/vtc-ext-test/tests/example.vtc
 ==============================================
 #    top  TEST /mnt/tests/test.vtc passed (5.951)
 ```
