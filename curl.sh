@@ -7,11 +7,16 @@ source ${SCRIPT_DIR}/conf.sh
 CONNECT=""
 PARAM=("${@}")
 VERBOSE=0
+HOST=""
 
 if [[ "${PARAM[*]}" =~ "https" ]]; then
     PORT=443
 else
     PORT=80
+fi
+
+if [[ "${PARAM[*]}" =~ https?://([^:/]+) ]]; then
+    HOST=${BASH_REMATCH[1]}
 fi
 
 i=0
@@ -60,7 +65,7 @@ PARAM=("${PARAM[@]}")
 
 if [ -n "${CONNECT}" ]; then
     CONNECTIP=$(dig $CONNECT +short|tail -n1)
-    PARAM=("--resolve" "$CONNECT:$PORT:$CONNECTIP" "${PARAM[@]}")
+    PARAM=("--resolve" "$HOST:$PORT:$CONNECTIP" "${PARAM[@]}")
 fi
 
 #-------------------------
