@@ -50,16 +50,17 @@ if [[ -z "${CONNECT}" ]]; then
     fi
 fi
 
+TPLT="-v $SCRIPT_DIR/tests/template:/mnt/tests/template"
 if [ -z "$1" ]; then
-    MNT="$DEFAULT_VTC_DIR:/mnt/tests"
+    MNT="-v $DEFAULT_VTC_DIR:/mnt/tests"
     VTCTG="$DEFAULT_VTC_DIR/*.vtc"
 elif [ -e "$1" ]; then
     TG=$(realpath $1)
     if [ -d "$TG" ]; then
-        MNT="$TG:/mnt/tests"
+        MNT="$TPLT -v $TG:/mnt/tests"
         VTCTG="$TG/*.vtc"
     else
-        MNT="$TG:/mnt/tests/test.vtc"
+        MNT="$TPLT -v $TG:/mnt/tests/test.vtc"
         VTCTG="$TG"
     fi
 fi
@@ -88,14 +89,14 @@ docker_build
 
 if [[ -n "${EXECSHELL}" ]]; then
     docker run --rm \
-        -v $MNT \
+        $MNT \
         -it $DOCKER_IMAGE_NAME \
         /bin/bash
     exit 0
 fi
 
 docker run --rm \
-    -v $MNT \
+    $MNT \
     -it $DOCKER_IMAGE_NAME \
     /bin/bash -c "varnishtest ${VERBOSE} -Dtarget=\"${CONNECT}\" ${VTCOPT} -j ${VTC_JOBS} -b ${VTC_BUFFER_SIZE} /mnt/tests/*.vtc"
 

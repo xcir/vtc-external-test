@@ -6,8 +6,8 @@ This is a script for easy unit testing using varnishtest for domains in CDNs, et
 | | |
 |--|:--|
 | Author:                   | Shohei Tanaka(@xcir) |
-| Date:                     | 2024/02/26 |
-| Version:                  | 1 |
+| Date:                     | - |
+| Version:                  | trunk |
 | Manual section:           | 7 |
 
 # Require
@@ -19,10 +19,31 @@ This is a script for easy unit testing using varnishtest for domains in CDNs, et
 ```
 xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ cat tests/example.vtc 
 vtest "example.net"
+
+# ./tests/template/ha.vtc
+include /mnt/tests/template/ha.vtc
+
+client c_http -connect ${h1_fe2_sock} {
+    txreq -req GET -url "/" -hdr "Host: example.net"
+    rxresp
+    expect resp.status        == "200"
+} -run
+
+client c_http -connect ${h1_fe1_sock} {
+    txreq -req GET -url "/" -hdr "Host: example.net"
+    rxresp
+    expect resp.status        == "200"
+} -run
+
+xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ cat tests/template/ha.vtc
+################################################################
+# HAProxy Template
+# https = h1_fe1_sock
+# http  = h1_fe2_sock
+################################################################
+
 feature ignore_unknown_macro
-
 feature cmd {haproxy --version 2>&1 | grep -q 'HA-*Proxy version'}
-
 haproxy h1 -conf {
     defaults
         mode   http
@@ -47,29 +68,12 @@ haproxy h1 -conf {
         bind "fd@${fe2}"
 } -start
 
-
-#-----------------------------------------
-
-client c_http -connect ${h1_fe2_sock} {
-    txreq -req GET -url "/" -hdr "Host: example.net"
-    rxresp
-    expect resp.status        == "200"
-} -run
-
-client c_https -connect ${h1_fe1_sock} {
-    txreq -req GET -url "/" -hdr "Host: example.net"
-    rxresp
-    expect resp.status        == "200"
-} -run
-
 xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ ./vtc.sh -c example.net tests/example.vtc 
 ==============================================
   Target Server: example.net
-            VTC: /home/xcir/git/vtc-ext-test/tests/example.vtc
+            VTC: /home/xcir/work/akamai/vtc-external-test/tests/example.vtc
 ==============================================
-[+] Building 1.6s (6/6) FINISHED
-....
-#    top  TEST /mnt/tests/test.vtc passed (6.198)
+#    top  TEST /mnt/tests/test.vtc passed (5.951)
 ```
 
 # What is this?
@@ -133,38 +137,8 @@ DOCKER_IMAGE_NAME="vtc-external-test"
 vtest "test case description"
 
 ##############################
-#Fixed form here
-##############################
-feature ignore_unknown_macro
-
-feature cmd {haproxy --version 2>&1 | grep -q 'HA-*Proxy version'}
-
-haproxy h1 -conf {
-    defaults
-        mode   http
-        timeout connect         5s
-        timeout server          5s
-        timeout client          5s
-
-    backend be1
-        #https
-        server srv1 ${target}:443 ssl verify none sni req.hdr(Host)
-    backend be2
-        #http
-        server srv1 ${target}:80
-
-    frontend fe1
-        #https
-        use_backend be1
-        bind "fd@${fe1}"
-    frontend fe2
-        #http
-        use_backend be2
-        bind "fd@${fe2}"
-} -start
-
-##############################
-#Fixed up to here
+# include HAproxy template
+include /mnt/tests/template/ha.vtc
 ##############################
 
 client c_http -connect ${h1_fe2_sock} {
@@ -183,7 +157,7 @@ client c_https -connect ${h1_fe1_sock} {
 
 ```
 
-`#Fixed form here` to `#Fixed up to here` are fixed.
+VTC needs to `include /mnt/tests/template/ha.vtc` to test the external domain.
 Please copy&paste.
 
 Specify with `-connect` to connect from the client to the target.
@@ -228,8 +202,9 @@ increse `VTC_BUFFER_SIZE` in `conf.sh`
 The maximum number of header lines([MAX_HDR](https://github.com/varnishcache/varnish-cache/blob/varnish-7.4.2/bin/varnishtest/vtc_http.h#L31)) in varnishtest is 64.
 For example, if you specify the full Pragma for debugging Akamai, it may be exceeded, so you may want to specify what you need.
 
+## Not working "include"
+
+Use the `-f` option to recreate the image.
+
 # To-Do
 
-## support vtc include
-
-https://github.com/vtest/VTest/pull/33
