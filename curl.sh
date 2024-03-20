@@ -2,7 +2,7 @@
 
 usage_exit() {
   cat << EOF 1>&2
-Usage: $0 [--vn target name] [--vc connection server] [--vo extra curl option] [--vp port] [--verbose] [curl options / URL]
+Usage: $0 [--vn target name] [--vc connection server] [--ve extra curl option name] [--vp port] [--verbose] [curl options / URL]
 Example: $0 --verbose --vc example.net -I http://example.net
 --verbose can be used to check the generated curl commands
 EOF
@@ -41,7 +41,7 @@ for v in "${PARAM[@]}"; do
             unset PARAM[$((i))]
             unset PARAM[$((i+1))]
             ;;
-        --vo)
+        --ve)
             optarg="${PARAM[$i+1]}"
             if [[ -n "$(eval echo \${CURLOPT_${optarg}[*]})" ]]; then
                 eval "PARAM+=(\"\${CURLOPT_${optarg}[@]}\")"

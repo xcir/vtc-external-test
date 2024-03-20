@@ -15,7 +15,7 @@ This is a script for easy unit testing using varnishtest for domains in CDNs, et
 - docker
 - curl (when using `curl.sh`)
 
-# VTC Quick tutorial
+# Quick tutorial
 
 ```
 xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ cat tests/example.vtc 
@@ -77,60 +77,15 @@ xcir@DESKTOP-UL5EP50:~/git/vtc-ext-test$ ./vtc.sh -c example.net tests/example.v
 #    top  TEST /mnt/tests/test.vtc passed (5.951)
 ```
 
-# curl.sh Quick tutorial
-
-```
-xcir@DESKTOP-UL5EP50:~/git/vtc-external-test$ ./curl.sh --vc example.net --verbose -I  http://example.net/
-##############################
-  Target Server | example.net
- Target IP:PORT | 93.184.216.34:80
-        Command | curl --resolve example.net:80:93.184.216.34 --verbose -I http://example.net/
-##############################
-
-* Added example.net:80:93.184.216.34 to DNS cache
-* Hostname example.net was found in DNS cache
-*   Trying 93.184.216.34:80...
-* Connected to example.net (93.184.216.34) port 80 (#0)
-> HEAD / HTTP/1.1
-> Host: example.net
-> User-Agent: curl/7.81.0
-> Accept: */*
-> 
-* Mark bundle as not supporting multiuse
-< HTTP/1.1 200 OK
-HTTP/1.1 200 OK
-< Accept-Ranges: bytes
-Accept-Ranges: bytes
-< Age: 499909
-Age: 499909
-< Cache-Control: max-age=604800
-Cache-Control: max-age=604800
-< Content-Type: text/html; charset=UTF-8
-Content-Type: text/html; charset=UTF-8
-< Date: Tue, 19 Mar 2024 15:56:55 GMT
-Date: Tue, 19 Mar 2024 15:56:55 GMT
-< Etag: "3147526947+gzip"
-Etag: "3147526947+gzip"
-< Expires: Tue, 26 Mar 2024 15:56:55 GMT
-Expires: Tue, 26 Mar 2024 15:56:55 GMT
-< Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
-Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
-< Server: ECS (sac/2508)
-Server: ECS (sac/2508)
-< X-Cache: HIT
-X-Cache: HIT
-< Content-Length: 1256
-Content-Length: 1256
-
-< 
-* Connection #0 to host example.net left intact
-```
 
 # What is this?
 
 See [this article.](https://labs.gree.jp/blog/?p=23009)
 
-# Options
+# vtc.sh
+
+
+## Options
 
 ```
 Usage: ./vtc.sh [-h] [-v] [-s] [-f] [-n target name] [-c connection server] [-o extra varnishtest option] [vtc_file or vtc_dir]
@@ -153,7 +108,29 @@ Example: ./vtc.sh -c example.net tests/example.vtc
 | -o [extra varnishtest option]         | Used to specify additional macros, etc. to varnishtest   | - | `-o "-Dmacro=1"` |
 | [vtc_file or vtc_dir] | Specify a single vtc or path | `tests/` | `tests/example.net.vtc` |
 
+# curl.sh
+
+Generate curl commands using `conf.sh`.
+It is used for a small check.
+
+## Options
+```
+Usage: ./curl.sh [--vn target name] [--vc connection server] [--ve extra curl option name] [--vp port] [--verbose] [curl options / URL]
+Example: ./curl.sh --verbose --vc example.net -I http://example.net
+--verbose can be used to check the generated curl commands
+```
+| option | explanation | default | example |
+|-|:-|:-|:-|
+| --verbose                        | Verbose mode  | - | - |
+| --vn [target name]               | Name of the target server defined in `conf.sh` | - | `--vn stg` |
+| --vc [connection server]         | Specify the connection server    | - | `--vc example.net` |
+| --ve [extra curl option name]    | Name of the extra option defined in `conf.sh` | - | `--ve akamai` |
+| --vp [port]                      | Use want to change the port to connect to (`--vn`,`--vc` option must be specified) | - | `--vp 8080` |
+| [curl options / URL ]            | Specify curl options, URL | - | `-I https://example.net` |
+
 # conf.sh
+
+Settings to be used in `vtc.sh`,`curl.sh`
 
 ```
 #!/bin/sh
@@ -161,10 +138,8 @@ Example: ./vtc.sh -c example.net tests/example.vtc
 # Define the target server to be used with the -n option.
 # Example: if you want to target example.net when specifying `-n staging``, define C_staging="example.net".
 # default is `C_default`.
-
-#C_stg="staging.example.net"
-#C_prod="example.net"
-#C_default="${C_stg}"
+C_example="example.net"
+C_default="${C_example}"
 
 # Specify the path of the VTC.
 # This is the default value if VTC is not specified at execution.
@@ -178,6 +153,16 @@ VTC_BUFFER_SIZE=3M
 
 # docker image name
 DOCKER_IMAGE_NAME="vtc-external-test"
+
+# curl.sh --ve option(Array)
+# Example: if you want to add a header to the request, define CURLOPT_example=("-H" "X-Example1: example1" "-H" "X-Example2: example2").
+# https://community.akamai.com/customers/s/article/Akamairxdxn3?language=en_US
+CURLOPT_akamai=("-H" "pragma: akamai-x-cache-on,akamai-x-cache-remote-on,akamai-x-check-cacheable,akamai-x-get-cache-key,akamai-x-get-extracted-values,akamai-x-get-request-id,akamai-x-serial-no, akamai-x-get-true-cache-key")
+# https://docs.edgecast.com/cdn/Content/Knowledge_Base/X_EC_Debug.htm
+CURLOPT_edgecast=("-H" "X-EC-Debug: x-ec-cache,x-ec-check-cacheable,x-ec-cache-key,x-ec-cache-state")
+# https://docs.fastly.com/ja/guides/checking-cache
+CURLOPT_fastly=("-H" "Fastly-Debug:1")
+
 ```
 
 # How to write VTC
