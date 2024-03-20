@@ -2,7 +2,7 @@
 
 usage_exit() {
   cat << EOF 1>&2
-Usage: $0 [-h] [-v] [-s] [-f] [-n target name] [-c connection server] [-o extra varnishtest option] [vtc_file or vtc_dir]
+Usage: $0 [-h] [-v] [-s] [-f] [-n target name] [-c connection server] [-o extra varnishtest option] [-e extra varnishtest option name] [vtc_file or vtc_dir]
     -s Entering docker container shell
     -f Force rebuild docker image
     -h Show this help
@@ -28,7 +28,7 @@ docker_build() {
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 source ${SCRIPT_DIR}/conf.sh
 
-while getopts sfhvn:c:o: OPT
+while getopts sfhvn:c:o:e: OPT
 do
     case $OPT in
         h)  usage_exit;;
@@ -38,6 +38,7 @@ do
         c)  CONNECT=$OPTARG;;
         n)  TGNAME=$OPTARG;;
         o)  VTCOPT=$OPTARG;;
+        e)  VTCOPTNAME=$OPTARG;;
     esac
 done
 shift $((OPTIND - 1))
@@ -47,6 +48,12 @@ if [[ -z "${CONNECT}" ]]; then
         CONNECT="$(eval echo \${C_${TGNAME}})"
     else
         CONNECT="${C_default}"
+    fi
+fi
+
+if [[ -z "${VTCOPT}" ]]; then
+    if [[ -n "$(eval echo \${VTCOPT_${VTCOPTNAME}})" ]]; then
+        VTCOPT="$(eval echo \${VTCOPT_${VTCOPTNAME}})"
     fi
 fi
 

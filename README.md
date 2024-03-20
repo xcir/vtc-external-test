@@ -88,7 +88,7 @@ See [this article.](https://labs.gree.jp/blog/?p=23009)
 ## Options
 
 ```
-Usage: ./vtc.sh [-h] [-v] [-s] [-f] [-n target name] [-c connection server] [-o extra varnishtest option] [vtc_file or vtc_dir]
+Usage: ./vtc.sh [-h] [-v] [-s] [-f] [-n target name] [-c connection server] [-o extra varnishtest option] [-e extra varnishtest option name] [vtc_file or vtc_dir]
     -s Entering docker container shell
     -f Force rebuild docker image
     -h Show this help
@@ -99,14 +99,15 @@ Example: ./vtc.sh -c example.net tests/example.vtc
 
 | option | explanation | default | example |
 |-|:-|:-|:-|
-| -h       | help    | - | - |
-| -v        | Enable verbose mode    | - | - |
-| -s        | Entering docker container shell    | - | - |
-| -f        | Force rebuild docker image    | - | - |
-| -n [target name]       | Name of the target server defined in `conf.sh` | `default` | `-n stg` |
-| -c [connection server]    | Specify the connection server    | - | `-c example.net` |
+| -h                                    | help    | - | - |
+| -v                                    | Enable verbose mode    | - | - |
+| -s                                    | Entering docker container shell    | - | - |
+| -f                                    | Force rebuild docker image    | - | - |
+| -n [target name]                      | Name of the target server defined in `conf.sh` | `default` | `-n stg` |
+| -c [connection server]                | Specify the connection server    | - | `-c example.net` |
 | -o [extra varnishtest option]         | Used to specify additional macros, etc. to varnishtest   | - | `-o "-Dmacro=1"` |
-| [vtc_file or vtc_dir] | Specify a single vtc or path | `tests/` | `tests/example.net.vtc` |
+| -e [extra varnishtest option name]    | Name of the extra option defined in `conf.sh`  | - | `-e example` |
+| [vtc_file or vtc_dir]                 | Specify a single vtc or path | `tests/` | `tests/example.net.vtc` |
 
 # curl.sh
 
@@ -153,6 +154,9 @@ VTC_BUFFER_SIZE=3M
 
 # docker image name
 DOCKER_IMAGE_NAME="vtc-external-test"
+
+# vtc.sh --ve option
+VTCOPT_example='-Dmacro=1'
 
 # curl.sh --ve option(Array)
 # Example: if you want to add a header to the request, define CURLOPT_example=("-H" "X-Example1: example1" "-H" "X-Example2: example2").

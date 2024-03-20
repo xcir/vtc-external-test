@@ -19,6 +19,9 @@ VTC_BUFFER_SIZE=3M
 # docker image name
 DOCKER_IMAGE_NAME="vtc-external-test"
 
+# vtc.sh --ve option
+VTCOPT_example='-Dmacro=1'
+
 # curl.sh --ve option(Array)
 # Example: if you want to add a header to the request, define CURLOPT_example=("-H" "X-Example1: example1" "-H" "X-Example2: example2").
 # https://community.akamai.com/customers/s/article/Akamairxdxn3?language=en_US
