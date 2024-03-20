@@ -17,17 +17,9 @@ source ${SCRIPT_DIR}/conf.sh
 CONNECT=""
 PARAM=("${@}")
 VERBOSE=0
-HOST=""
+PORT=""
 
-if [[ "${PARAM[*]}" =~ "https" ]]; then
-    PORT=443
-else
-    PORT=80
-fi
-
-if [[ "${PARAM[*]}" =~ https?://([^:/]+) ]]; then
-    HOST=${BASH_REMATCH[1]}
-else
+if [[ !("${PARAM[*]}" =~ https?://([^:/]+)) ]]; then
     echo "URL not found."
     usage_exit
 fi
@@ -60,7 +52,7 @@ for v in "${PARAM[@]}"; do
         --vp)
             optarg="${PARAM[$i+1]}"
             if [[ "$1" =~ ^[0-9]+$ ]]; then
-                PORT=$optarg
+                PORT=":$optarg"
             fi
             unset PARAM[$((i))]
             unset PARAM[$((i+1))]
@@ -78,8 +70,7 @@ if [ ${#PARAM[@]} -eq 0 ]; then
 fi
 
 if [ -n "${CONNECT}" ]; then
-    CONNECTIP=$(dig $CONNECT +short|tail -n1)
-    PARAM=("--resolve" "$HOST:$PORT:$CONNECTIP" "${PARAM[@]}")
+    PARAM=("--connect-to" "::${CONNECT}${PORT}" "${PARAM[@]}")
 fi
 
 #-------------------------
@@ -87,8 +78,7 @@ fi
 if [ ${VERBOSE} -eq 1 ]; then
     echo '#curl.sh######################'
     if [ -n "${CONNECT}" ]; then
-    printf "%15s | %s\n" "Target Server" "${CONNECT}"
-    printf "%15s | %s\n" "Target IP:PORT" "${CONNECTIP}:${PORT}"
+    printf "%15s | %s\n" "Target Server" "${CONNECT}${PORT}"
     fi
     printf "%15s | %s\n" "Command" "curl ${PARAM[*]}"
     echo '##############################'
