@@ -1,9 +1,16 @@
 #!/bin/bash
-# todo:
-# パラメータチェックを追加
-# Commentを英語に変更
-shopt -s nocasematch
 
+usage_exit() {
+  cat << EOF 1>&2
+Usage: $0 [--vn target name] [--vc connection server] [--vo extra curl option] [--vp port] [--verbose] [curl options / URL]
+Example: $0 --verbose --vc example.net -I http://example.net
+--verbose can be used to check the generated curl commands
+EOF
+  exit 1
+}
+
+### main
+shopt -s nocasematch
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 source ${SCRIPT_DIR}/conf.sh
 
@@ -20,13 +27,15 @@ fi
 
 if [[ "${PARAM[*]}" =~ https?://([^:/]+) ]]; then
     HOST=${BASH_REMATCH[1]}
+else
+    echo "URL not found."
+    usage_exit
 fi
 
 i=0
 for v in "${PARAM[@]}"; do
     case "$v" in
         --vn)
-            #接続先指定
             optarg="${PARAM[$i+1]}"
             if [[ -n "$(eval echo \${C_${optarg}})" ]]; then
                 CONNECT="$(eval echo \${C_${optarg}})"
@@ -35,14 +44,12 @@ for v in "${PARAM[@]}"; do
             unset PARAM[$((i+1))]
             ;;
         --vc)
-            #接続先指定(con)
             optarg="${PARAM[$i+1]}"
             CONNECT=$optarg
             unset PARAM[$((i))]
             unset PARAM[$((i+1))]
             ;;
         --vo)
-            #マクロ指定
             optarg="${PARAM[$i+1]}"
             if [[ -n "$(eval echo \${CURLOPT_${optarg}[*]})" ]]; then
                 eval "PARAM+=(\"\${CURLOPT_${optarg}[@]}\")"
@@ -51,9 +58,10 @@ for v in "${PARAM[@]}"; do
             unset PARAM[$((i+1))]
             ;;
         --vp)
-            #port指定
             optarg="${PARAM[$i+1]}"
-            PORT=$optarg
+            if [[ "$1" =~ ^[0-9]+$ ]]; then
+                PORT=$optarg
+            fi
             unset PARAM[$((i))]
             unset PARAM[$((i+1))]
             ;;
@@ -65,6 +73,9 @@ for v in "${PARAM[@]}"; do
 done
 PARAM=("${PARAM[@]}")
 
+if [ ${#PARAM[@]} -eq 0 ]; then
+    usage_exit
+fi
 
 if [ -n "${CONNECT}" ]; then
     CONNECTIP=$(dig $CONNECT +short|tail -n1)
