@@ -12,17 +12,20 @@ EOF
 ### main
 shopt -s nocasematch
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
-source ${SCRIPT_DIR}/conf.sh
 
 CONNECT=""
 PARAM=("${@}")
 VERBOSE=0
 PORT=""
 
-if [[ !("${PARAM[*]}" =~ https?://([^:/]+)) ]]; then
+if [[ !("${PARAM[*]}" =~ (https?://[^ ]+)) ]]; then
     echo "URL not found."
     usage_exit
+else
+    URL="${BASH_REMATCH[1]}"
 fi
+
+source ${SCRIPT_DIR}/conf.sh
 
 i=0
 for v in "${PARAM[@]}"; do
