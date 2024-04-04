@@ -79,13 +79,13 @@ fi
 #-------------------------
 
 if [ ${VERBOSE} -eq 1 ]; then
-    echo '#curl.sh######################'
+    echo '#curl.sh######################' >&2
     if [ -n "${CONNECT}" ]; then
-    printf "%15s | %s\n" "Target Server" "${CONNECT}${PORT}"
+    printf "%15s | %s\n" "Target Server" "${CONNECT}${PORT}" >&2
     fi
-    printf "%15s | %s\n" "Command" "curl ${PARAM[*]}"
-    echo '##############################'
-    echo
+    printf "%15s | %s\n" "Command" "curl ${PARAM[*]}" >&2
+    echo '##############################' >&2
+    echo >&2
 fi
 
 curl "${PARAM[@]}"
